@@ -1,0 +1,22 @@
+{
+  "name": "autogen-og-image",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "./src/gen.js",
+  "scripts": {
+    "start": "node ./src/gen.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "22.2.0",
+    "puppeteer-core": "22.2.0",
+    "remark-extract-frontmatter": "3.2.0",
+    "remark-frontmatter": "5.0.0",
+    "remark-parse": "11.0.0",
+    "remark-stringify": "11.0.0",
+    "unified": "11.0.4",
+    "yaml": "2.3.4"
+  }
+}
