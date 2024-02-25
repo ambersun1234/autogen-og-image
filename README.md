@@ -17,7 +17,8 @@ description: Random article description
 
 ## Run
 ```shell
-$ npm start
+$ npm run build
+$ node ./dist/main.js
 ```
 
 ## References
