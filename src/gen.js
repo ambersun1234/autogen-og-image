@@ -9,15 +9,65 @@ import remarkFrontmatter from "remark-frontmatter";
 import { unified } from "unified";
 import puppeteer from "puppeteer";
 import { parse } from "yaml";
+import dotenv from "dotenv";
 
 import { generateHtml } from "./gen-html.js";
 
-const width = 630;
-const forceRegenerate = true;
-const root = "";
-const outputDir = "./img";
+dotenv.config();
 
+const customizedEnv = getEnv();
 const markdownFiles = [];
+
+function getEnv() {
+  if (!process.env.INPUT_DIR || !process.env.OUTPUT_DIR) {
+    throw new Error(
+      "Missing required environment variables: INPUT_DIR, OUTPUT_DIR"
+    );
+  }
+
+  const sys = {
+    inputDir: process.env.INPUT_DIR,
+    outputDir: process.env.OUTPUT_DIR,
+    forceRegenerate: process.env.FORCE_REGENERATE === "true" ? true : false,
+  };
+
+  const data = {
+    inputDir: process.env.INPUT_DIR,
+    outputDir: process.env.OUTPUT_DIR,
+    author: process.env.AUTHOR || "",
+    avatar: process.env.AVATAR || null,
+  };
+
+  const options = {
+    width: process.env.WIDTH || 630,
+    headerColor: process.env.HEADER_COLOR || "#0366d6",
+    headerSize: process.env.HEADER_SIZE || 32,
+    descriptionColor: process.env.DESCRIPTION_COLOR || "#586069",
+    descriptionSize: process.env.DESCRIPTION_SIZE || 16,
+    footerColor: process.env.FOOTER_COLOR || "#586069",
+    footerSize: process.env.FOOTER_SIZE || 12,
+  };
+
+  return { data, options, sys };
+}
+
+function getJekyllData(data) {
+  // const requiredFields = ["title", "description", "author", "date"];
+  const requiredFields = ["title", "author", "date"];
+  for (const field of requiredFields) {
+    if (!data[field]) {
+      throw new Error(`Missing required field: ${field}`);
+    }
+  }
+
+  return {
+    title: data.title,
+    description: data.description,
+    author: data.author,
+    avatar: data.avatar || null,
+    date: new Date(),
+  };
+}
 
 function getFileChecksum(filePath) {
   const f = fs.readFileSync(filePath, "utf-8");
@@ -52,7 +102,7 @@ async function genImage(filePath, data) {
   if (fs.existsSync(checksumHistoryPath)) {
     const oldChecksum = fs.readFileSync(checksumHistoryPath, "utf-8");
 
-    if (newChecksum === oldChecksum && !forceRegenerate) {
+    if (newChecksum === oldChecksum && !customizedEnv.sys.forceRegenerate) {
       console.log("Skipping(same checksum found): ", filePath);
       return;
     }
@@ -65,17 +115,21 @@ async function genImage(filePath, data) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  // data.author = "Shawn Hsu";
-  // data.avatar = "";
+  data.author = customizedEnv.data.author;
+  data.avatar = customizedEnv.data.avatar;
 
+  const width = customizedEnv.options.width;
   page.setViewport({
     width: width + 16 * 2,
     height: Math.ceil(width / 1.91) + 16 * 2,
   });
   try {
-    await page.setContent(generateHtml(data, { width }), {
-      waitUntil: "domcontentloaded",
-    });
+    await page.setContent(
+      generateHtml(getJekyllData(data), customizedEnv.options),
+      {
+        waitUntil: "domcontentloaded",
+      }
+    );
   } catch (e) {
     console.error(`Cannot generate image for ${filePath}: ${e}`);
     await page.close();
@@ -112,7 +166,7 @@ async function genImage(filePath, data) {
 }
 
 (async () => {
-  await getMarkdownFiles(root);
+  await getMarkdownFiles(inputDir);
 
   const parser = unified()
     .use(remarkParse)

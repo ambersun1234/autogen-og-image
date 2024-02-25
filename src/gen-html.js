@@ -21,40 +21,7 @@ function generateAvatarBlock(data) {
   return "";
 }
 
-function getDefaultOptions(customize) {
-  return {
-    width: customize.width || 630,
-    headerColor: customize.headerColor || "#0366d6",
-    headerSize: customize.headerSize || 32,
-    descriptionSize: customize.descriptionSize || 16,
-    descriptionColor: customize.descriptionColor || "#586069",
-    footerSize: customize.footerSize || 12,
-    footerColor: customize.footerColor || "#586069",
-  };
-}
-
-function getJekyllData(data) {
-  // const requiredFields = ["title", "description", "author", "date"];
-  const requiredFields = ["title", "author", "date"];
-  for (const field of requiredFields) {
-    if (!data[field]) {
-      throw new Error(`Missing required field: ${field}`);
-    }
-  }
-
-  return {
-    title: data.title,
-    description: data.description,
-    author: data.author,
-    avatar: data.avatar || null,
-    date: new Date(),
-  };
-}
-
-function generateHtml(jekyllData, customizedOptions) {
-  const data = getJekyllData(jekyllData);
-  const options = getDefaultOptions(customizedOptions);
-
+function generateHtml(data, options) {
   return `
     <!DOCTYPE html>
     <html lang="en">

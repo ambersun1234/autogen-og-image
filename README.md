@@ -15,6 +15,15 @@ description: Random article description
 ---
 ```
 
+## Environment Variable
+This tool also support environment variable as input\
+You can find various config in [.env.example](./.env.example)
+
+Just copy to a new file `.env` and make some changes, you're good to go
+```shell
+$ cp .env.example .env
+```
+
 ## Run
 ```shell
 $ npm run build
