@@ -50,8 +50,7 @@ function getEnv() {
 }
 
 function getJekyllData(data) {
-  // const requiredFields = ["title", "description", "date"];
-  const requiredFields = ["title", "date"];
+  const requiredFields = ["title", "description", "date"];
   for (const field of requiredFields) {
     if (!data[field]) {
       throw new Error(`Missing required field: ${field}`);
