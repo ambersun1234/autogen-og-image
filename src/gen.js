@@ -10,13 +10,18 @@ import { unified } from "unified";
 import puppeteer from "puppeteer";
 import { parse } from "yaml";
 import dotenv from "dotenv";
-
-import { generateHtml } from "./gen-html.js";
+import camelcaseKeys from "camelcase-keys";
 
 dotenv.config();
 
 const customizedEnv = getEnv();
 const markdownFiles = [];
+
+function formatDate(dateString) {
+  const options = { year: "numeric", month: "short", day: "numeric" };
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", options);
+}
 
 function getEnv() {
   if (!process.env.INPUT_DIR || !process.env.OUTPUT_DIR) {
@@ -28,27 +33,19 @@ function getEnv() {
   const sys = {
     inputDir: process.env.INPUT_DIR,
     outputDir: process.env.OUTPUT_DIR,
+    templatePath: process.env.TEMPLATE_PATH || "./template.html",
     forceRegenerate: process.env.FORCE_REGENERATE === "true" ? true : false,
   };
 
-  const data = {
-    inputDir: process.env.INPUT_DIR,
-    outputDir: process.env.OUTPUT_DIR,
-    author: process.env.AUTHOR || "",
-    avatar: process.env.AVATAR || null,
-  };
+  const rawData = {};
+  for (const key of Object.keys(process.env)) {
+    if (key.startsWith("DATA_")) {
+      rawData[key.replace("DATA_", "")] = process.env[key];
+    }
+  }
+  const data = camelcaseKeys(rawData, { deep: true });
 
-  const options = {
-    width: process.env.WIDTH || 630,
-    headerColor: process.env.HEADER_COLOR || "#0366d6",
-    headerSize: process.env.HEADER_SIZE || 32,
-    descriptionColor: process.env.DESCRIPTION_COLOR || "#586069",
-    descriptionSize: process.env.DESCRIPTION_SIZE || 16,
-    footerColor: process.env.FOOTER_COLOR || "#586069",
-    footerSize: process.env.FOOTER_SIZE || 12,
-  };
-
-  return { data, options, sys };
+  return { data, sys };
 }
 
 function getJekyllData(data) {
@@ -65,7 +62,7 @@ function getJekyllData(data) {
     description: data.description,
     author: data.author,
     avatar: data.avatar || null,
-    date: new Date(),
+    date: formatDate(data.date),
   };
 }
 
@@ -92,13 +89,16 @@ async function getMarkdownFiles(filePath) {
   }
 }
 
-async function genImage(filePath, data) {
+async function genImage(filePath, template, rawData) {
   const newChecksum = getFileChecksum(filePath);
   const checksumFileName = `${path.basename(
     filePath,
     path.extname(filePath)
   )}.md5`;
-  const checksumHistoryPath = path.join(outputDir, checksumFileName);
+  const checksumHistoryPath = path.join(
+    customizedEnv.sys.outputDir,
+    checksumFileName
+  );
   if (fs.existsSync(checksumHistoryPath)) {
     const oldChecksum = fs.readFileSync(checksumHistoryPath, "utf-8");
 
@@ -115,21 +115,21 @@ async function genImage(filePath, data) {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  data.author = customizedEnv.data.author;
-  data.avatar = customizedEnv.data.avatar;
+  rawData.author = customizedEnv.data.author;
+  rawData.avatar = customizedEnv.data.avatar;
 
-  const width = customizedEnv.options.width;
+  const width = 630;
   page.setViewport({
     width: width + 16 * 2,
     height: Math.ceil(width / 1.91) + 16 * 2,
   });
   try {
-    await page.setContent(
-      generateHtml(getJekyllData(data), customizedEnv.options),
-      {
-        waitUntil: "domcontentloaded",
-      }
-    );
+    const data = getJekyllData(rawData);
+    const templateInjection = new Function("data", "return `" + template + "`");
+
+    await page.setContent(templateInjection(data), {
+      waitUntil: "domcontentloaded",
+    });
   } catch (e) {
     console.error(`Cannot generate image for ${filePath}: ${e}`);
     await page.close();
@@ -154,11 +154,14 @@ async function genImage(filePath, data) {
     ]);
   });
 
-  console.log("Writing to: ", `${outputDir}/${path.parse(filePath).name}.png`);
+  console.log(
+    "Writing to: ",
+    `${customizedEnv.sys.outputDir}/${path.parse(filePath).name}.png`
+  );
   await page.screenshot({
     fullPage: false,
     type: "png",
-    path: `${outputDir}/${path.parse(filePath).name}.png`,
+    path: `${customizedEnv.sys.outputDir}/${path.parse(filePath).name}.png`,
   });
 
   await page.close();
@@ -166,7 +169,7 @@ async function genImage(filePath, data) {
 }
 
 (async () => {
-  await getMarkdownFiles(inputDir);
+  await getMarkdownFiles(customizedEnv.sys.inputDir);
 
   const parser = unified()
     .use(remarkParse)
@@ -181,7 +184,8 @@ async function genImage(filePath, data) {
     });
   }
 
+  const template = fs.readFileSync(customizedEnv.sys.templatePath, "utf-8");
   for (const [filePath, data] of markdownMap) {
-    await genImage(filePath, data);
+    await genImage(filePath, template, data);
   }
 })();
