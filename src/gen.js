@@ -32,8 +32,6 @@ function getEnv() {
   };
 
   const data = {
-    inputDir: process.env.INPUT_DIR,
-    outputDir: process.env.OUTPUT_DIR,
     author: process.env.AUTHOR || "",
     avatar: process.env.AVATAR || null,
   };
@@ -52,8 +50,8 @@ function getEnv() {
 }
 
 function getJekyllData(data) {
-  // const requiredFields = ["title", "description", "author", "date"];
-  const requiredFields = ["title", "author", "date"];
+  // const requiredFields = ["title", "description", "date"];
+  const requiredFields = ["title", "date"];
   for (const field of requiredFields) {
     if (!data[field]) {
       throw new Error(`Missing required field: ${field}`);
@@ -98,7 +96,7 @@ async function genImage(filePath, data) {
     filePath,
     path.extname(filePath)
   )}.md5`;
-  const checksumHistoryPath = path.join(outputDir, checksumFileName);
+  const checksumHistoryPath = path.join(customizedEnv.sys.outputDir, checksumFileName);
   if (fs.existsSync(checksumHistoryPath)) {
     const oldChecksum = fs.readFileSync(checksumHistoryPath, "utf-8");
 
@@ -106,8 +104,6 @@ async function genImage(filePath, data) {
       console.log("Skipping(same checksum found): ", filePath);
       return;
     }
-  } else {
-    fs.writeFileSync(checksumHistoryPath, newChecksum);
   }
 
   console.log("Generating image for: ", filePath);
@@ -154,11 +150,14 @@ async function genImage(filePath, data) {
     ]);
   });
 
-  console.log("Writing to: ", `${outputDir}/${path.parse(filePath).name}.png`);
+  // write checksum to file after all the generation 
+  fs.writeFileSync(checksumHistoryPath, newChecksum);
+
+  console.log("Writing to: ", `${customizedEnv.sys.outputDir}/${path.parse(filePath).name}.png`);
   await page.screenshot({
     fullPage: false,
     type: "png",
-    path: `${outputDir}/${path.parse(filePath).name}.png`,
+    path: `${customizedEnv.sys.outputDir}/${path.parse(filePath).name}.png`,
   });
 
   await page.close();
@@ -166,7 +165,7 @@ async function genImage(filePath, data) {
 }
 
 (async () => {
-  await getMarkdownFiles(inputDir);
+  await getMarkdownFiles(customizedEnv.sys.inputDir);
 
   const parser = unified()
     .use(remarkParse)

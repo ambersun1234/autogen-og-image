@@ -67,7 +67,7 @@ function generateHtml(data, options) {
     
               img {
                 width: 100%;
-              object-fit: cover;
+                object-fit: cover;
               }
             }
           }

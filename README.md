@@ -15,6 +15,14 @@ description: Random article description
 ---
 ```
 
+<hr>
+
+For this tool, the `frontmatter` must have the following attributes
+
+|Required|`title`|`description`|`date`|
+|:--:|:--:|:--:|:--:|
+|Optional|`author`|`avatar`||
+
 ## Environment Variable
 This tool also support environment variable as input\
 You can find various config in [.env.example](./.env.example)
