@@ -131,7 +131,7 @@ async function genImage(filePath, data) {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ["--enable-gpu", "--no-sandbox", "--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
 
