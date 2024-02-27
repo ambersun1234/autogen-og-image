@@ -23,6 +23,38 @@ For this tool, the `frontmatter` must have the following attributes
 |:--:|:--:|:--:|:--:|
 |Optional|`author`|`avatar`||
 
+## GitHub Action
+Create an action file `.github/workflows/ci.yaml` and fill in following content
+```yaml
+name: Build and Deploy to Github Pages
+
+on:
+  push:
+    branches:
+      - master # Here source code branch is `master`, it could be other branch
+
+jobs:
+  autogen_og_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install puppeteer dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgbm1
+      - uses: actions/checkout@v3
+      - uses: ambersun1234/autogen-og-image@v1.0.0
+        with:
+          input_dir: ${{ github.workspace }}/_posts
+          output_dir: ${{ github.workspace }}/assets/images/og
+          author: 'Shawn Hsu'
+      - name: Commit og image and Push
+        run: |
+          git config --local user.name 'Shawn Hsu'
+          git config --local user.email 'ambersun1234@users.noreply.github.com'
+          git commit -am "Update og image"
+          git push
+```
+
 ## Environment Variable
 This tool also support environment variable as input\
 You can find various config in [.env.example](./.env.example)
