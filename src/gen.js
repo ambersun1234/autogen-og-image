@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
+import _ from "lodash";
 import * as core from "@actions/core";
 import extract from "remark-extract-frontmatter";
 import remarkParse from "remark-parse";
@@ -20,13 +21,12 @@ const customizedEnv = getEnv();
 const markdownFiles = [];
 
 function getEnv() {
-  if (
-    (!process.env.INPUT_DIR && !process.env.OUTPUT_DIR) ||
-    (core.getInput("input_dir") && core.getInput("output_dir"))
-  ) {
-    throw new Error(
-      "Missing required environment variables: INPUT_DIR, OUTPUT_DIR"
-    );
+  if (!process.env.INPUT_DIR && !core.getInput("input_dir")) {
+    throw new Error("Missing required environment variables: INPUT_DIR");
+  }
+
+  if (!process.env.OUTPUT_DIR && !core.getInput("output_dir")) {
+    throw new Error("Missing required environment variables: OUTPUT_DIR");
   }
 
   const sys = {
@@ -44,7 +44,7 @@ function getEnv() {
     avatar: process.env.AVATAR || core.getInput("avatar") || null,
   };
 
-  const options = {
+  const rawOptions = {
     width: process.env.WIDTH || core.getInput("width") || 630,
     headerColor:
       process.env.HEADER_COLOR || core.getInput("header_color") || "#0366d6",
@@ -59,6 +59,10 @@ function getEnv() {
       process.env.FOOTER_COLOR || core.getInput("footer_color") || "#586069",
     footerSize: process.env.FOOTER_SIZE || core.getInput("footer_size") || 12,
   };
+  const options = _.transform(rawOptions, function (result, value, key) {
+    let numberValue = Number(value);
+    result[key] = isNaN(numberValue) ? value : numberValue;
+  });
 
   return { data, options, sys };
 }
@@ -112,6 +116,9 @@ async function getMarkdownFiles(filePath) {
 async function genImage(filePath, data) {
   const slug = getFileSlug(filePath);
 
+  await fs.promises.mkdir(customizedEnv.sys.outputDir, { recursive: true });
+  await fs.promises.writeFile(path.join(customizedEnv.sys.outputDir, ".nojekyll"), "")
+
   const newChecksum = getFileChecksum(filePath);
   const checksumFileName = `${slug}.md5`;
   const checksumHistoryPath = path.join(
@@ -132,6 +139,7 @@ async function genImage(filePath, data) {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--enable-gpu", "--no-sandbox", "--disable-setuid-sandbox"],
+    executablePath: "/usr/bin/google-chrome-stable",
   });
   const page = await browser.newPage();
 

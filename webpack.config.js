@@ -1,6 +1,7 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 
 const path = require("path");
+const { optimize } = require("webpack");
 
 const isProduction = process.env.NODE_ENV == "production";
 
@@ -35,6 +36,9 @@ const config = {
       // Learn more about loaders from https://webpack.js.org/loaders/
     ],
   },
+  optimization: {
+    minimize: false
+  }
 };
 
 module.exports = () => {

@@ -12,6 +12,7 @@
   "dependencies": {
     "@actions/core": "1.10.1",
     "dotenv": "16.4.5",
+    "lodash": "4.17.21",
     "puppeteer": "22.2.0",
     "puppeteer-core": "22.2.0",
     "remark-extract-frontmatter": "3.2.0",
