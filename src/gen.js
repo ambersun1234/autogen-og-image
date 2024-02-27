@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 
+import * as core from "@actions/core";
 import extract from "remark-extract-frontmatter";
 import remarkParse from "remark-parse";
 import remarkStringify from "remark-stringify";
@@ -19,31 +20,44 @@ const customizedEnv = getEnv();
 const markdownFiles = [];
 
 function getEnv() {
-  if (!process.env.INPUT_DIR || !process.env.OUTPUT_DIR) {
+  if (
+    (!process.env.INPUT_DIR && !process.env.OUTPUT_DIR) ||
+    (core.getInput("input_dir") && core.getInput("output_dir"))
+  ) {
     throw new Error(
       "Missing required environment variables: INPUT_DIR, OUTPUT_DIR"
     );
   }
 
   const sys = {
-    inputDir: process.env.INPUT_DIR,
-    outputDir: process.env.OUTPUT_DIR,
-    forceRegenerate: process.env.FORCE_REGENERATE === "true" ? true : false,
+    inputDir: process.env.INPUT_DIR || core.getInput("input_dir"),
+    outputDir: process.env.OUTPUT_DIR || core.getInput("output_dir"),
+    forceRegenerate:
+      (process.env.FORCE_REGENERATE || core.getInput("force_regenerate")) ===
+      "true"
+        ? true
+        : false,
   };
 
   const data = {
-    author: process.env.AUTHOR || "",
-    avatar: process.env.AVATAR || null,
+    author: process.env.AUTHOR || core.getInput("author") || "",
+    avatar: process.env.AVATAR || core.getInput("avatar") || null,
   };
 
   const options = {
-    width: process.env.WIDTH || 630,
-    headerColor: process.env.HEADER_COLOR || "#0366d6",
-    headerSize: process.env.HEADER_SIZE || 32,
-    descriptionColor: process.env.DESCRIPTION_COLOR || "#586069",
-    descriptionSize: process.env.DESCRIPTION_SIZE || 16,
-    footerColor: process.env.FOOTER_COLOR || "#586069",
-    footerSize: process.env.FOOTER_SIZE || 12,
+    width: process.env.WIDTH || core.getInput("width") || 630,
+    headerColor:
+      process.env.HEADER_COLOR || core.getInput("header_color") || "#0366d6",
+    headerSize: process.env.HEADER_SIZE || core.getInput("header_size") || 32,
+    descriptionColor:
+      process.env.DESCRIPTION_COLOR ||
+      core.getInput("description_color") ||
+      "#586069",
+    descriptionSize:
+      process.env.DESCRIPTION_SIZE || core.getInput("description_size") || 16,
+    footerColor:
+      process.env.FOOTER_COLOR || core.getInput("footer_color") || "#586069",
+    footerSize: process.env.FOOTER_SIZE || core.getInput("footer_size") || 12,
   };
 
   return { data, options, sys };

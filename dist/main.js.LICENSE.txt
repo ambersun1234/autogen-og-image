@@ -2,6 +2,10 @@
 
 /* istanbul ignore next -- @preserve */
 
+/*! formdata-polyfill. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> */
+
+/*! ws. MIT License. Einar Otto Stangvik <einaros@gmail.com> */
+
 /**
  * @fileoverview Main entrypoint for libraries using yargs-parser in Node.js
  * CJS and ESM environments.
