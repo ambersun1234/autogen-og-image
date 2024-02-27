@@ -71,6 +71,12 @@ function getFileChecksum(filePath) {
   return crypto.createHash("md5").update(f).digest("hex");
 }
 
+function getFileSlug(filePath) {
+  const filename = path.basename(filePath, path.extname(filePath));
+  const slugIndex = filename.search(/[a-zA-Z]/);
+  return filename.substring(slugIndex);
+}
+
 async function getMarkdownFiles(filePath) {
   try {
     const files = await fs.promises.readdir(filePath);
@@ -90,12 +96,14 @@ async function getMarkdownFiles(filePath) {
 }
 
 async function genImage(filePath, data) {
+  const slug = getFileSlug(filePath);
+
   const newChecksum = getFileChecksum(filePath);
-  const checksumFileName = `${path.basename(
-    filePath,
-    path.extname(filePath)
-  )}.md5`;
-  const checksumHistoryPath = path.join(customizedEnv.sys.outputDir, checksumFileName);
+  const checksumFileName = `${slug}.md5`;
+  const checksumHistoryPath = path.join(
+    customizedEnv.sys.outputDir,
+    checksumFileName
+  );
   if (fs.existsSync(checksumHistoryPath)) {
     const oldChecksum = fs.readFileSync(checksumHistoryPath, "utf-8");
 
@@ -149,14 +157,14 @@ async function genImage(filePath, data) {
     ]);
   });
 
-  // write checksum to file after all the generation 
+  // write checksum to file after all the generation
   fs.writeFileSync(checksumHistoryPath, newChecksum);
 
-  console.log("Writing to: ", `${customizedEnv.sys.outputDir}/${path.parse(filePath).name}.png`);
+  console.log("Writing to: ", `${customizedEnv.sys.outputDir}/${slug}.png`);
   await page.screenshot({
     fullPage: false,
     type: "png",
-    path: `${customizedEnv.sys.outputDir}/${path.parse(filePath).name}.png`,
+    path: `${customizedEnv.sys.outputDir}/${slug}.png`,
   });
 
   await page.close();
