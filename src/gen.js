@@ -129,7 +129,10 @@ async function genImage(filePath, data) {
 
   console.log("Generating image for: ", filePath);
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
   const page = await browser.newPage();
 
   data.author = customizedEnv.data.author;
