@@ -17,7 +17,7 @@ description: Random article description
 
 <hr>
 
-For this tool, the `frontmatter` must have the following attributes
+For this tool, the `frontmatter` will take the following attributes
 
 |Required|`title`|`description`|`date`|
 |:--:|:--:|:--:|:--:|
@@ -37,23 +37,35 @@ jobs:
   autogen_og_image:
     runs-on: ubuntu-latest
     steps:
-      - name: Install puppeteer dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgbm1
       - uses: actions/checkout@v3
+      - uses: mujo-code/puppeteer-headful@16.6.0
+      # Install the corresponding font on system if needed
+      - name: Install Chinese Font
+        run: |
+          sudo apt update
+          sudo apt install -y fonts-noto
       - uses: ambersun1234/autogen-og-image@v1.0.0
+        # Change author and avatar to your own(optionally)
         with:
           input_dir: ${{ github.workspace }}/_posts
-          output_dir: ${{ github.workspace }}/assets/images/og
-          author: 'Shawn Hsu'
+          output_dir: ${{ github.workspace }}/assets/img/og
+          author: "Shawn Hsu"
+          avatar: "https://avatars.githubusercontent.com/u/13270428?v=4"
       - name: Commit og image and Push
+        # Change the user.name and user.email to your own
         run: |
           git config --local user.name 'Shawn Hsu'
           git config --local user.email 'ambersun1234@users.noreply.github.com'
-          git commit -am "Update og image"
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "Working directory clean. Nothing to commit."
+            exit 0
+          fi
+          git add .
+          git commit -m "Update og image"
           git push
 ```
+
+For more customizable options(e.g. font size, font color), please refer to [action.yml](./action.yml)
 
 ## Environment Variable
 This tool also support environment variable as input\
