@@ -45,19 +45,20 @@ function getEnv() {
   };
 
   const rawOptions = {
-    width: process.env.WIDTH || core.getInput("width") || 630,
+    width: 1200,
+    height: 630,
     headerColor:
       process.env.HEADER_COLOR || core.getInput("header_color") || "#0366d6",
-    headerSize: process.env.HEADER_SIZE || core.getInput("header_size") || 32,
+    headerSize: process.env.HEADER_SIZE || core.getInput("header_size") || 56,
     descriptionColor:
       process.env.DESCRIPTION_COLOR ||
       core.getInput("description_color") ||
       "#586069",
     descriptionSize:
-      process.env.DESCRIPTION_SIZE || core.getInput("description_size") || 16,
+      process.env.DESCRIPTION_SIZE || core.getInput("description_size") || 32,
     footerColor:
       process.env.FOOTER_COLOR || core.getInput("footer_color") || "#586069",
-    footerSize: process.env.FOOTER_SIZE || core.getInput("footer_size") || 12,
+    footerSize: process.env.FOOTER_SIZE || core.getInput("footer_size") || 16,
   };
   const options = _.transform(rawOptions, function (result, value, key) {
     let numberValue = Number(value);
@@ -146,10 +147,10 @@ async function genImage(filePath, data) {
   data.author = customizedEnv.data.author;
   data.avatar = customizedEnv.data.avatar;
 
-  const width = customizedEnv.options.width;
+  const padding = 32;
   page.setViewport({
-    width: width + 16 * 2,
-    height: Math.ceil(width / 1.91) + 16 * 2,
+    width: customizedEnv.options.width + padding * 2,
+    height: customizedEnv.options.height + padding * 2,
   });
   try {
     await page.setContent(

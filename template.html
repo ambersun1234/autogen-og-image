@@ -13,56 +13,46 @@
       }
 
       .article {
-        width: 630px;
-        aspect-ratio: 1.91 / 1;
+        width: 1200px;
+        height: 630px;
         background-color: #fff;
         border: 1px solid #e1e4e8;
         border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        padding: 16px;
+        padding: 32px;
         position: relative;
       }
 
       .article-header {
-        padding: 16px;
+        padding: 32px;
         display: flex;
         justify-content: space-between;
         align-items: center;
 
         .article-name {
-          font-size: 32px;
+          font-size: 56px;
           font-weight: 600;
           color: #0366d6;
           flex: 1;
         }
-
-        .article-image {
-          flex: 0 0 10%;
-          margin-left: 16px;
-
-          img {
-            width: 100%;
-            object-fit: cover;
-          }
-        }
       }
 
       .article-description {
-        padding: 16px;
-        font-size: 16px;
+        padding: 32px;
+        font-size: 32px;
         margin-top: 8px;
         display: flex;
         color: #586069;
       }
 
       .article-footer {
-        padding: 16px;
+        padding: 32px;
         border-top: 1px solid #e1e4e8;
         justify-content: space-between;
         align-items: center;
-        font-size: 12px;
+        font-size: 16px;
         display: flex;
-        width: calc(100% - 2 * 16px);
+        width: calc(100% - 2 * 32px);
         bottom: 0;
         position: absolute;
         box-sizing: border-box;
@@ -75,23 +65,43 @@
           align-self: flex-end;
         }
       }
+
+      .container {
+        display: flex;
+
+        .left {
+          width: 100%;
+        }
+
+        .right {
+          flex: 0 0 20%;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="article">
-      <div class="article-header">
-        <div class="article-name">Random Article title</div>
-        <div class="article-image">
+      <div class="container">
+        <div class="left">
+          <div class="article-header">
+            <div class="article-name">Random Article title</div>
+          </div>
+          <div class="article-description">Random article description</div>
+        </div>
+
+        <div class="right">
           <img
             src="https://avatars.githubusercontent.com/u/13270428"
             alt="User"
-            width="48"
-            height="48"
+            width="100%"
             style="border-radius: 50%"
           />
         </div>
       </div>
-      <div class="article-description">Random article description</div>
+
       <div class="article-footer">
         <div class="left">Shawn Hsu</div>
         <div class="right">
