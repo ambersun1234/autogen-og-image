@@ -81,7 +81,7 @@ function getJekyllData(data) {
     description: data.description,
     author: data.author,
     avatar: data.avatar || null,
-    date: new Date(),
+    date: data.date,
   };
 }
 
