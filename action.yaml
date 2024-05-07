@@ -8,10 +8,9 @@ inputs:
   output_dir:
     description: "The directory where the output files should go."
     required: true
-  force_generate:
+  force_regenerate:
     description: "Force generate the OG Image."
     required: false
-    default: "false"
   author:
     description: "The author name of the website."
     required: false
@@ -21,31 +20,24 @@ inputs:
   width:
     description: "The width of the OG Image."
     required: false
-    default: "630"
   header_color:
     description: "The color of the header."
     required: false
-    default: "#0366d6"
   header_size:
     description: "The size of the header."
     required: false
-    default: "32"
   description_color:
     description: "The color of the description."
     required: false
-    default: "#586069"
   description_size:
     description: "The size of the description."
     required: false
-    default: "16"
   footer_color:
     description: "The color of the footer."
     required: false
-    default: "#586069"
   footer_size:
     description: "The size of the footer."
     required: false
-    default: "12"
 
 runs:
   using: "node16"
