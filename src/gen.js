@@ -130,7 +130,7 @@ async function genImage(filePath, data) {
     const oldChecksum = fs.readFileSync(checksumHistoryPath, "utf-8");
 
     if (newChecksum === oldChecksum && !customizedEnv.sys.forceRegenerate) {
-      console.log("Skipping(same checksum found): ", filePath);
+      console.log("🚧 Skipping(same checksum found): ", filePath);
       return;
     }
   }
@@ -160,7 +160,7 @@ async function genImage(filePath, data) {
       }
     );
   } catch (e) {
-    console.error(`Cannot generate image for ${filePath}: ${e}`);
+    console.error(`❌ Cannot generate image for ${filePath}: ${e}`);
     await page.close();
     await browser.close();
     return;
@@ -186,7 +186,7 @@ async function genImage(filePath, data) {
   // write checksum to file after all the generation
   fs.writeFileSync(checksumHistoryPath, newChecksum);
 
-  console.log("Writing to: ", `${customizedEnv.sys.outputDir}/${slug}.png`);
+  console.log("✅ Writing to: ", `${customizedEnv.sys.outputDir}/${slug}.png`);
   await page.screenshot({
     fullPage: false,
     type: "png",
